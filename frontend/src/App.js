@@ -3,8 +3,27 @@ import { Container } from "@mui/material";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
+import TaskList from "./components/TaskList";
+import { makeStyles } from "@mui/styles";
+
+const useStyles = makeStyles((theme) => ({
+    appContainer: {
+        display: "flex",
+        flexDirection: "column",
+        minHeight: "100vh",
+    },
+    content: {
+        flex: 1,
+        display: "flex",
+        flexDirection: "column",
+    },
+    footer: {
+        marginTop: "auto",
+    },
+}));
 
 function App() {
+    const classes = useStyles();
     const darkTheme = createTheme({
         palette: {
             mode: "dark",
@@ -14,9 +33,15 @@ function App() {
     return (
         <ThemeProvider theme={darkTheme}>
             <Container>
-                <Header></Header>
-
-                <Footer></Footer>
+                <div className={classes.appContainer}>
+                    <Header></Header>
+                    <div className={classes.content}>
+                        <TaskList></TaskList>
+                    </div>
+                    <div className={classes.footer}>
+                        <Footer></Footer>
+                    </div>
+                </div>
             </Container>
         </ThemeProvider>
     );
