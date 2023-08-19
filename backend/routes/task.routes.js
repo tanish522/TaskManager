@@ -9,7 +9,7 @@ const {
 
 router.post("/", createTask);
 
-router.get("/:id", getTask);
+router.get("/", getTask);
 
 router.put("/:id", updateTask);
 

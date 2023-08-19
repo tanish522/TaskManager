@@ -2,11 +2,20 @@ const mongoose = require("mongoose");
 const { Schema } = require("mongoose");
 
 const taskSchema = mongoose.Schema({
-    taskName: {
+    name: {
         type: String,
         require: true,
     },
-    user: [{ type: Schema.Types.ObjectId, ref: "User" }],
+    status: {
+        type: String,
+        enum: ["pending", "in-progress", "completed"],
+        default: "pending",
+        require: true,
+    },
+    userId: {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+    },
 });
 
 // creating user model

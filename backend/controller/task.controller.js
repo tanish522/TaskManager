@@ -2,8 +2,8 @@ const Task = require("../models/Task");
 
 const getTask = async (req, res) => {
     try {
-        const userId = req.params.id;
-        const result = await Task.find({ user: userId });
+        // const userId = req.params.id;
+        const result = await Task.find({});
         if (result.length === 0) {
             return res.status(404).send("Tasks not found");
         }
