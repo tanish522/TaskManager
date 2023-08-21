@@ -4,7 +4,7 @@ function Footer() {
     return (
         <footer>
             <center>
-                <p>&copy; 2023 My To-Do List App</p>
+                <p>&copy; 2023 To-Do List App</p>
             </center>
         </footer>
     );

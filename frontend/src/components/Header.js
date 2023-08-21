@@ -13,9 +13,6 @@ import AppBar from "@mui/material/AppBar";
 import AdbIcon from "@mui/icons-material/Adb";
 import AccountCircleIcon from "@mui/icons-material/AccountCircleSharp";
 
-const pages = ["Add Task", "Pricing", "Blog"];
-const settings = ["Profile", "Logout"];
-
 const useStyles = makeStyles((theme) => ({
     title: {
         flexGrow: 1,
@@ -38,6 +35,11 @@ const Header = () => {
     };
     const handleClose = () => {
         setAnchorEl(null);
+    };
+
+    const logoutHandler = () => {
+        // dispatch(logout());
+        // navigate("/");
     };
 
     return (
@@ -82,7 +84,7 @@ const Header = () => {
                         }}
                     >
                         <MenuItem onClick={handleClose}>Profile</MenuItem>
-                        <MenuItem onClick={handleClose}>Logout</MenuItem>
+                        <MenuItem onClick={logoutHandler}>Logout</MenuItem>
                     </Menu>
                 </Toolbar>
                 <Divider></Divider>

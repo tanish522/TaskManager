@@ -1,4 +1,5 @@
 const User = require("../models/User");
+const generateToken = require("../utils/generateToken,js");
 
 const insertUser = async (req, res) => {
     try {
@@ -40,6 +41,7 @@ const login = async (req, res) => {
                 _id: user._id,
                 userName: user.userName,
                 email: user.email,
+                token: generateToken(user._id),
             },
         });
     } catch (error) {
