@@ -65,9 +65,19 @@ const TaskList = () => {
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
     const [task, setTask] = useState([]);
+    const [taskName, setTaskName] = useState("");
     const id = "64db20ab63fd90ea4b654529";
 
-    const addNewTask = async () => {};
+    const addNewTask = async () => {
+        try {
+            await axios.post(`http://localhost:5000/task/`, {
+                name: "taskName",
+            });
+            fetchTasks();
+        } catch (error) {
+            console.error("Error adding new task:", error);
+        }
+    };
 
     const fetchTasks = async () => {
         try {
@@ -78,6 +88,10 @@ const TaskList = () => {
         } catch (error) {
             console.error("Error fetching tasks:", error);
         }
+    };
+
+    const handleInputChange = (e) => {
+        setTaskName(e.target.value);
     };
 
     useEffect(() => {
@@ -118,13 +132,15 @@ const TaskList = () => {
                             >
                                 Task
                             </Typography>
-
+                            {taskName}
                             <TextField
                                 required
                                 id="filled-required"
                                 placeholder="Write your new task"
                                 variant="filled"
                                 className={classes.textField}
+                                value={taskName} // Controlled component with the task state
+                                onChange={handleInputChange}
                             />
                             <div className={classes.buttonDiv}>
                                 <div className={classes.buttonStyle}>

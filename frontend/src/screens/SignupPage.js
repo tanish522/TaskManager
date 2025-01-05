@@ -3,8 +3,6 @@ import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
 import TextField from "@mui/material/TextField";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Checkbox from "@mui/material/Checkbox";
 import { Link, useNavigate } from "react-router-dom";
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
@@ -30,36 +28,60 @@ function Copyright(props) {
     );
 }
 
-// TODO remove, this demo shouldn't need to reset the theme.
-
 const defaultTheme = createTheme();
+const darkTheme = createTheme({
+    palette: {
+        mode: "dark",
+    },
+});
 
 const SignUpPage = () => {
     const [loading, setLoading] = new useState(false);
+    const [error, setError] = new useState(false);
     const navigate = useNavigate();
 
     // yup and formik email and password verification
     const validationSchema = yup.object({
+        userName: yup
+            .string("Enter your username")
+            .min(3, "Username should be at least 3 characters")
+            .required("Username is required"),
         email: yup
             .string("Enter your email")
             .email("Enter a valid email")
             .required("Email is required"),
         password: yup
-            .string()
-            .required("No password provided.")
-            .min(8, "Password is too short - should be 8 chars minimum.")
+            .string("Enter your password")
+            .min(8, "Password should be at least 8 characters")
             .matches(
                 /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d!@#$%^&*()_+{}[\]:;<>,.?~\-_]+$/,
                 "Password must contain at least one letter and one number"
-            ),
+            )
+            .required("Password is required"),
     });
+
     const formik = useFormik({
         initialValues: {
+            userName: "",
             email: "",
             password: "",
         },
-        validationSchema: validationSchema,
-        onSubmit: (values) => {},
+        validationSchema,
+        onSubmit: async (values) => {
+            setLoading(true);
+            setError("");
+            try {
+                await axios.post("http://localhost:5000/user/signup", values);
+                navigate("/login");
+            } catch (error) {
+                setError(
+                    error.response?.data?.message ||
+                        "An unexpected error occurred"
+                );
+            } finally {
+                setLoading(false);
+            }
+        },
     });
 
     const handleSubmit = async (event) => {
@@ -73,14 +95,29 @@ const SignUpPage = () => {
                 email: formData.get("email"),
                 password: formData.get("password"),
             });
+            alert("Sign up successful");
             // navigate to /login
             navigate("/login");
-        } catch (error) {}
+        } catch (error) {
+            setLoading(false);
+            if (error.response && error.response.status === 400) {
+                // Handle specific 400 error (Email already in use)
+                if (error.response.data.message === "Email already in use") {
+                    alert(
+                        "The email is already in use. Please use a different email address."
+                    );
+                } else {
+                    alert("An unexpected error occurred. Please try again.");
+                }
+            } else {
+                alert("An unexpected error occurred. Please try again.");
+            }
+        }
         setLoading(false);
     };
 
     return (
-        <ThemeProvider theme={defaultTheme}>
+        <ThemeProvider theme={darkTheme}>
             <Container component="main" maxWidth="xs">
                 {loading && <Loading />}
                 <CssBaseline />
@@ -98,6 +135,11 @@ const SignUpPage = () => {
                     <Typography component="h1" variant="h5">
                         Sign up
                     </Typography>
+                    {error && (
+                        <Typography color="error" sx={{ mt: 2 }}>
+                            {error}
+                        </Typography>
+                    )}
                     <Box
                         component="form"
                         noValidate
@@ -114,6 +156,15 @@ const SignUpPage = () => {
                                     id="userName"
                                     label="UserName"
                                     autoFocus
+                                    {...formik.getFieldProps("userName")}
+                                    error={
+                                        formik.touched.userName &&
+                                        Boolean(formik.errors.userName)
+                                    }
+                                    helperText={
+                                        formik.touched.userName &&
+                                        formik.errors.userName
+                                    }
                                 />
                             </Grid>
 
@@ -125,12 +176,7 @@ const SignUpPage = () => {
                                     label="Email Address"
                                     name="email"
                                     autoComplete="email"
-                                    inputProps={{
-                                        style: { textTransform: "lowercase" },
-                                    }}
-                                    onChange={formik.handleChange}
-                                    onBlur={formik.handleBlur}
-                                    value={formik.values.email}
+                                    {...formik.getFieldProps("email")}
                                     error={
                                         formik.touched.email &&
                                         Boolean(formik.errors.email)
@@ -139,6 +185,9 @@ const SignUpPage = () => {
                                         formik.touched.email &&
                                         formik.errors.email
                                     }
+                                    inputProps={{
+                                        style: { textTransform: "lowercase" },
+                                    }}
                                     InputLabelProps={{
                                         shrink: true,
                                     }}
@@ -153,9 +202,7 @@ const SignUpPage = () => {
                                     type="password"
                                     id="password"
                                     autoComplete="new-password"
-                                    onChange={formik.handleChange}
-                                    onBlur={formik.handleBlur}
-                                    value={formik.values.password}
+                                    {...formik.getFieldProps("password")}
                                     error={
                                         formik.touched.password &&
                                         Boolean(formik.errors.password)
@@ -169,25 +216,15 @@ const SignUpPage = () => {
                                     }}
                                 />
                             </Grid>
-                            <Grid item xs={12}>
-                                <FormControlLabel
-                                    control={
-                                        <Checkbox
-                                            value="allowExtraEmails"
-                                            color="primary"
-                                        />
-                                    }
-                                    label="I want to receive inspiration, marketing promotions and updates via email."
-                                />
-                            </Grid>
                         </Grid>
                         <Button
                             type="submit"
                             fullWidth
                             variant="contained"
                             sx={{ mt: 3, mb: 2 }}
+                            disabled={loading}
                         >
-                            Sign Up
+                            {loading ? <Loading size={24} /> : "Sign Up"}
                         </Button>
                         <Link to="/login" variant="body2">
                             Already have an account? Log in

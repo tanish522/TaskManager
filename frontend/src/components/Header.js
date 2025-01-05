@@ -8,6 +8,7 @@ import {
     Menu,
     MenuItem,
 } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 import { makeStyles } from "@mui/styles";
 import AppBar from "@mui/material/AppBar";
 import AdbIcon from "@mui/icons-material/Adb";
@@ -27,6 +28,7 @@ const useStyles = makeStyles((theme) => ({
 
 const Header = () => {
     const classes = useStyles();
+    const navigate = useNavigate();
 
     const [anchorEl, setAnchorEl] = React.useState(null);
     const open = Boolean(anchorEl);
@@ -38,8 +40,10 @@ const Header = () => {
     };
 
     const logoutHandler = () => {
-        // dispatch(logout());
-        // navigate("/");
+        localStorage.removeItem("userInfo");
+        sessionStorage.removeItem("userInfo");
+        navigate("/login");
+        alert("You have been logged out");
     };
 
     return (
@@ -53,7 +57,6 @@ const Header = () => {
                         variant="h6"
                         noWrap
                         component="a"
-                        href="/"
                         sx={{
                             mr: 2,
                             display: { md: "flex" },

@@ -32,14 +32,20 @@ function Copyright(props) {
 // TODO remove, this demo shouldn't need to reset the theme.
 
 const defaultTheme = createTheme();
+const darkTheme = createTheme({
+    palette: {
+        mode: "dark",
+    },
+});
 
 const LoginPage = ({}) => {
-    const [email, setEmail] = new useState("");
-    const [password, setPassword] = new useState("");
-    const [error, setError] = new useState(false);
-    const [loading, setLoading] = new useState(false);
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [error, setError] = useState(false);
+    const [loading, setLoading] = useState(false);
     const [emailError, setEmailError] = useState("");
     const [passwordError, setPasswordError] = useState("");
+    const [rememberMe, setRememberMe] = useState(false);
     let navigate = useNavigate();
 
     const handleSubmit = async (event) => {
@@ -48,35 +54,57 @@ const LoginPage = ({}) => {
         setEmailError("");
         setPasswordError("");
 
-        try {
-            const formData = new FormData(event.currentTarget);
+        // email and password validation
+        if (!email) {
+            setEmailError("Email is required");
+            setLoading(false);
+            return;
+        }
+        if (!password) {
+            setPasswordError("Password is required");
+            setLoading(false);
+            return;
+        }
 
+        try {
             const { data } = await axios.post(
                 "http://localhost:5000/user/login",
                 {
-                    // Extract email and password from form data
-                    email: formData.get("email"),
-                    password: formData.get("password"),
+                    email,
+                    password,
                 }
             );
             console.log(data);
             const userData = data.user;
-            localStorage.setItem("userInfo", JSON.stringify(data));
+            if (rememberMe) {
+                localStorage.setItem("userInfo", JSON.stringify(userData));
+            } else {
+                sessionStorage.setItem("userInfo", JSON.stringify(userData));
+            }
+            navigate("/"); // Redirect after login
         } catch (error) {
-            setError(error.response.data.message);
+            setError(
+                error.response?.data?.message || "An unexpected error occurred"
+            );
         }
         setLoading(false);
     };
 
+    const handleCheckboxChange = () => {
+        setRememberMe(!rememberMe); // Toggle "Remember Me" state
+    };
+
     useEffect(() => {
-        const userInfo = localStorage.getItem("userInfo");
+        const userInfo =
+            localStorage.getItem("userInfo") ||
+            sessionStorage.getItem("userInfo");
         if (userInfo) {
-            navigate("/");
+            navigate("/"); // Redirect if user is already logged in
         }
     }, [navigate]);
 
     return (
-        <ThemeProvider theme={defaultTheme}>
+        <ThemeProvider theme={darkTheme}>
             <Container component="main" maxWidth="xs">
                 {loading && <Loading />}
                 <CssBaseline />
@@ -95,9 +123,7 @@ const LoginPage = ({}) => {
                     <Typography component="h1" variant="h5">
                         Log in
                     </Typography>
-                    {error && (
-                        <ErrorMessage message="Invalid email or password"></ErrorMessage>
-                    )}
+                    {error && <ErrorMessage message={error}></ErrorMessage>}
                     <Box
                         component="form"
                         onSubmit={handleSubmit}
@@ -113,10 +139,12 @@ const LoginPage = ({}) => {
                             name="email"
                             autoComplete="email"
                             autoFocus
-                            // value={email}
-                            // onChange={(e) => {
-                            //     setEmail(e.target.value);
-                            // }}
+                            value={email}
+                            onChange={(e) => {
+                                setEmail(e.target.value);
+                            }}
+                            error={!!emailError}
+                            helperText={emailError}
                         />
                         <TextField
                             margin="normal"
@@ -127,14 +155,21 @@ const LoginPage = ({}) => {
                             type="password"
                             id="password"
                             autoComplete="current-password"
-                            // value={password}
-                            // onChange={(e) => {
-                            //     setPassword(e.target.value);
-                            // }}
+                            value={password}
+                            onChange={(e) => {
+                                setPassword(e.target.value);
+                            }}
+                            error={!!passwordError}
+                            helperText={passwordError}
                         />
                         <FormControlLabel
                             control={
-                                <Checkbox value="remember" color="primary" />
+                                <Checkbox
+                                    value="remember"
+                                    color="primary"
+                                    checked={rememberMe}
+                                    onChange={handleCheckboxChange}
+                                />
                             }
                             label="Remember me"
                         />
